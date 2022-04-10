@@ -15,9 +15,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 /**
- * ContactList class
+ * ContactList Class
  */
-public class ContactList {
+public class ContactList extends Observable{
 
     private static ArrayList<Contact> contacts;
     private String FILENAME = "contacts.sav";
@@ -28,6 +28,7 @@ public class ContactList {
 
     public void setContacts(ArrayList<Contact> contact_list) {
         contacts = contact_list;
+        notifyObservers();
     }
 
     public ArrayList<Contact> getContacts() {
@@ -36,18 +37,20 @@ public class ContactList {
 
     public ArrayList<String> getAllUsernames(){
         ArrayList<String> username_list = new ArrayList<String>();
-        for (Contact u : contacts){
-            username_list.add(u.getUsername());
+        for (Contact c : contacts){
+            username_list.add(c.getUsername());
             }
         return username_list;
     }
 
     public void addContact(Contact contact) {
         contacts.add(contact);
+        notifyObservers();
     }
 
     public void deleteContact(Contact contact) {
         contacts.remove(contact);
+        notifyObservers();
     }
 
     public Contact getContact(int index) {
@@ -58,11 +61,19 @@ public class ContactList {
         return contacts.size();
     }
 
-    public Contact getContactByUsername(String username){
+    public Contact getUserByUsername(String username){
         for (Contact c : contacts){
             if (c.getUsername().equals(username)){
                 return c;
             }
+        }
+        return null;
+    }
+
+    public Contact getContactByUsername(String username)
+    {
+        for (Contact contact : contacts) {
+            if (contact.getUsername().equals(username)) return contact;
         }
         return null;
     }
@@ -110,11 +121,14 @@ public class ContactList {
         } catch (IOException e) {
             contacts = new ArrayList<Contact>();
         }
+        notifyObservers();
     }
 
-
-    public boolean saveContacts(Context context)
-    {
+    /**
+     * @param context
+     * @return true: if save is successful, false: if save is unsuccessful
+     */
+    public boolean saveContacts(Context context) {
         try {
             FileOutputStream fos = context.openFileOutput(FILENAME, 0);
             OutputStreamWriter osw = new OutputStreamWriter(fos);
